@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Mail } from 'lucide-react';
 import { CustomEnquiry } from '../types';
-import { siteConfig } from '../lib/site';
+import { buildEmailLink, buildWhatsAppLink, siteConfig } from '../lib/site';
 import { ResilientImage } from '../components/ResilientImage';
 import { WhatsAppIcon } from '../components/BrandMark';
 import botanicalPaintingImg from '../assets/images/product_botanical_painting_1794649393512.jpg';
@@ -63,52 +63,105 @@ export const CustomCreationsPage: React.FC = () => {
     setSubmitError(null);
     setIsSubmitting(true);
 
+    const trimmedName = clientName.trim();
+    const trimmedPhone = clientPhone.trim();
+    const trimmedEmail = clientEmail.trim();
+    const trimmedOccasion = occasion.trim();
+    const trimmedTimeline = timeline.trim() || 'Flexible';
+    const trimmedDescription = description.trim();
+
+    const fallbackId = `INQ-${Math.floor(1000 + Math.random() * 9000)}`;
+    const fallbackSummary = [
+      `Hello ${siteConfig.name} ♡`,
+      `Custom Order Enquiry · Ref ${fallbackId}`,
+      ``,
+      `Name: ${trimmedName}`,
+      `WhatsApp: ${trimmedPhone}`,
+      trimmedEmail ? `Email: ${trimmedEmail}` : null,
+      `What I'd like made: ${creationType}`,
+      trimmedOccasion ? `Occasion: ${trimmedOccasion}` : null,
+      budgetRange ? `Budget: ${budgetRange}` : null,
+      trimmedTimeline ? `Needed by: ${trimmedTimeline}` : null,
+      ``,
+      `Idea:`,
+      trimmedDescription,
+    ]
+      .filter((line): line is string => line !== null)
+      .join('\n');
+
+    let enquiryId = fallbackId;
+    let emailStatus: DeliveryStatus = {
+      sent: false,
+      provider: 'mailto-fallback',
+      detail: `Use "Send by Email Instead" below to email ${siteConfig.email.address} directly.`,
+    };
+    let whatsappStatus: DeliveryStatus = {
+      sent: false,
+      provider: 'wa-me-link',
+      detail: `Press "Send on WhatsApp" below to share your pre-filled custom brief with ${siteConfig.phone.display}.`,
+    };
+    let whatsappUrl = buildWhatsAppLink(fallbackSummary);
+    let mailtoUrl = buildEmailLink(
+      `Custom Enquiry ${fallbackId} — ${creationType}`,
+      fallbackSummary
+    );
+
     try {
       const response = await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientName: clientName.trim(),
-          clientPhone: clientPhone.trim(),
-          clientEmail: clientEmail.trim(),
+          clientName: trimmedName,
+          clientPhone: trimmedPhone,
+          clientEmail: trimmedEmail,
           creationType,
-          occasion: occasion.trim(),
-          timeline: timeline.trim() || 'Flexible',
+          occasion: trimmedOccasion,
+          timeline: trimmedTimeline,
           budgetRange,
-          description: description.trim(),
+          description: trimmedDescription,
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || 'Could not prepare enquiry notification.');
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      if (isJson) {
+        const data = await response.json();
+        if (!response.ok && response.status === 400) {
+          throw new Error(data?.error || 'Please complete all required enquiry fields.');
+        }
+        if (response.ok && data?.ok) {
+          enquiryId = data.enquiryId || enquiryId;
+          emailStatus = data.emailStatus || emailStatus;
+          whatsappStatus = data.whatsappStatus || whatsappStatus;
+          whatsappUrl = data.whatsappUrl || whatsappUrl;
+          mailtoUrl = data.mailtoUrl || mailtoUrl;
+        }
       }
 
       const newEnquiry: CustomEnquiry = {
-        id: data.enquiryId,
+        id: enquiryId,
         submittedAt: new Date().toLocaleDateString('en-IN', {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
         }),
-        clientName: clientName.trim(),
-        clientEmail: clientEmail.trim(),
-        clientPhone: clientPhone.trim(),
+        clientName: trimmedName,
+        clientEmail: trimmedEmail,
+        clientPhone: trimmedPhone,
         creationType,
-        occasion: occasion.trim(),
-        timeline: timeline.trim() || 'Flexible',
+        occasion: trimmedOccasion,
+        timeline: trimmedTimeline,
         budgetRange,
-        description: description.trim(),
+        description: trimmedDescription,
       };
 
       const updated = [newEnquiry, ...submittedEnquiries];
       setSubmittedEnquiries(updated);
       setLatestConfirmation({
         enquiry: newEnquiry,
-        emailStatus: data.emailStatus,
-        whatsappStatus: data.whatsappStatus,
-        whatsappUrl: data.whatsappUrl,
-        mailtoUrl: data.mailtoUrl,
+        emailStatus,
+        whatsappStatus,
+        whatsappUrl,
+        mailtoUrl,
       });
 
       try {

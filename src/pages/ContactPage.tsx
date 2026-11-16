@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Mail, MapPin, Phone } from 'lucide-react';
 import { DeliveryLocation, PageRoute } from '../types';
-import { buildWhatsAppLink, siteConfig } from '../lib/site';
+import { buildEmailLink, buildWhatsAppLink, siteConfig } from '../lib/site';
 import { WhatsAppIcon } from '../components/BrandMark';
 import { DeliveryAddressMapPicker } from '../components/DeliveryAddressMapPicker';
 
@@ -52,33 +52,81 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     setSubmitError(null);
     setIsSubmitting(true);
 
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedMessage = message.trim();
+
+    const fallbackReference = `MSG-${Math.floor(1000 + Math.random() * 9000)}`;
+    const fallbackSummary = [
+      `Hello ${siteConfig.name} ♡`,
+      `Website Message · Ref ${fallbackReference}`,
+      ``,
+      `Name: ${trimmedName}`,
+      `Email: ${trimmedEmail}`,
+      trimmedPhone ? `Phone: ${trimmedPhone}` : null,
+      `Subject: ${subject || 'Studio Enquiry'}`,
+      ``,
+      trimmedMessage,
+    ]
+      .filter((line): line is string => line !== null)
+      .join('\n');
+
+    let confirmation: ContactConfirmation = {
+      referenceId: fallbackReference,
+      name: trimmedName,
+      subject,
+      emailStatus: {
+        sent: false,
+        provider: 'mailto-fallback',
+        detail: `Use the "Open Email App" button below to email ${siteConfig.email.address} directly.`,
+      },
+      whatsappStatus: {
+        sent: false,
+        provider: 'wa-me-link',
+        detail: `Press "Send on WhatsApp" below to send your pre-filled note to ${siteConfig.phone.display}.`,
+      },
+      whatsappUrl: buildWhatsAppLink(fallbackSummary, studioWhatsappNumber),
+      mailtoUrl: buildEmailLink(
+        `Website enquiry ${fallbackReference} — ${subject}`,
+        fallbackSummary,
+        siteConfig.email.address
+      ),
+    };
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
           subject,
-          message: message.trim(),
+          message: trimmedMessage,
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || 'Could not dispatch message.');
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      if (isJson) {
+        const data = await response.json();
+        if (!response.ok && response.status === 400) {
+          throw new Error(data?.error || 'Please fill in all required contact fields.');
+        }
+        if (response.ok && data?.ok) {
+          confirmation = {
+            referenceId: data.referenceId || confirmation.referenceId,
+            name: trimmedName,
+            subject,
+            emailStatus: data.emailStatus || confirmation.emailStatus,
+            whatsappStatus: data.whatsappStatus || confirmation.whatsappStatus,
+            whatsappUrl: data.whatsappUrl || confirmation.whatsappUrl,
+            mailtoUrl: data.mailtoUrl || confirmation.mailtoUrl,
+          };
+        }
       }
 
-      setSentConfirmation({
-        referenceId: data.referenceId,
-        name: name.trim(),
-        subject,
-        emailStatus: data.emailStatus,
-        whatsappStatus: data.whatsappStatus,
-        whatsappUrl: data.whatsappUrl,
-        mailtoUrl: data.mailtoUrl,
-      });
+      setSentConfirmation(confirmation);
       setName('');
       setEmail('');
       setPhone('');

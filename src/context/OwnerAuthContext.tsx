@@ -125,6 +125,13 @@ export const OwnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email.trim(), passcode }),
         });
+        const isJson = res.headers.get('content-type')?.includes('application/json');
+        if (!isJson) {
+          return {
+            ok: false,
+            error: `Owner authentication server returned HTTP ${res.status}. Ensure the API backend is deployed and running.`,
+          };
+        }
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data?.ok || !data?.token) {
           return { ok: false, error: data?.error || 'Owner verification failed.' };
@@ -145,6 +152,13 @@ export const OwnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
+      const isJson = res.headers.get('content-type')?.includes('application/json');
+      if (!isJson) {
+        return {
+          ok: false,
+          error: `OTP server endpoint returned HTTP ${res.status}. Ensure the API backend is running.`,
+        };
+      }
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.ok) {
         return { ok: false, error: data?.error || 'Unable to send verification code.' };
@@ -163,6 +177,13 @@ export const OwnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email.trim(), code: code.trim() }),
         });
+        const isJson = res.headers.get('content-type')?.includes('application/json');
+        if (!isJson) {
+          return {
+            ok: false,
+            error: `OTP server endpoint returned HTTP ${res.status}. Ensure the API backend is running.`,
+          };
+        }
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data?.ok || !data?.token) {
           return { ok: false, error: data?.error || 'Code verification failed.' };
