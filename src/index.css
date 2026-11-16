@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, Cambria, "Times New Roman", serif;
+  --font-display: "Cormorant Garamond", Georgia, Cambria, "Times New Roman", serif;
+  --font-script: "Great Vibes", "Cormorant Garamond", cursive;
+  --font-sans: "Lora", Georgia, serif;
+
+  --color-forest: #183923;
+  --color-forest-soft: #2d4a3b;
+  --color-ivory: #F8F0E4;
+  --color-ivory-deep: #EFE4D3;
+  --color-linen: #F1E6D9;
+  --color-petal: #F9E4E7;
+  --color-sage: #A8B18F;
+  --color-blush: #E9A9AA;
+  --color-rose: #CF6C87;
+  --color-gold: #B69A64;
+  --color-whatsapp: #2F7A56;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: #F8F0E4;
+    color: #183923;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+.script-accent {
+  font-family: var(--font-script);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sage arch category tabs from the MITSU Crntzz reference */
+.tab-arch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  width: 8.5rem;
+  padding: 1rem 0.75rem 0.9rem;
+  border-radius: 4.25rem 4.25rem 1rem 1rem;
+  background: linear-gradient(180deg, #b8c2a1 0%, #A8B18F 100%);
+  border: 1px solid rgba(24, 57, 35, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 14px 26px -22px rgba(24, 57, 35, 0.65);
+  color: #183923;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.tab-arch:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg, #f3cdd2 0%, #E9A9AA 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 18px 28px -20px rgba(207, 108, 135, 0.6);
+}
+
+.tab-arch__icon {
+  display: grid;
+  place-items: center;
+  height: 2.65rem;
+  width: 2.65rem;
+  border-radius: 999px;
+  background-color: rgba(248, 240, 228, 0.9);
+  border: 1px solid rgba(24, 57, 35, 0.3);
+  color: #183923;
+}
+
+.tab-arch__label {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.blob-forest {
+  background-color: #183923;
+  border-radius: 48% 52% 44% 56% / 58% 42% 58% 42%;
+}
+
+.washi-tape {
+  position: absolute;
+  height: 1.35rem;
+  width: 5rem;
+  background-color: rgba(233, 169, 170, 0.78);
+  box-shadow: 0 2px 6px rgba(24, 57, 35, 0.14);
+}
+
+/* Dual-handle price range slider thumbs */
+.price-range-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.price-range-input::-webkit-slider-runnable-track {
+  height: 0.375rem;
+  background: transparent;
+}
+
+.price-range-input::-moz-range-track {
+  height: 0.375rem;
+  background: transparent;
+}
+
+.price-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  height: 1.25rem;
+  width: 1.25rem;
+  margin-top: -0.4375rem;
+  border-radius: 9999px;
+  background-color: #FDF9F4;
+  border: 2.5px solid #183923;
+  box-shadow: 0 2px 6px rgba(24, 57, 35, 0.25);
+  cursor: grab;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.price-range-input::-webkit-slider-thumb:hover,
+.price-range-input:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.12);
+  border-color: #CF6C87;
+  background-color: #F9E4E7;
+}
+
+.price-range-input::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+.price-range-input::-moz-range-thumb {
+  pointer-events: auto;
+  height: 1.25rem;
+  width: 1.25rem;
+  border-radius: 9999px;
+  background-color: #FDF9F4;
+  border: 2.5px solid #183923;
+  box-shadow: 0 2px 6px rgba(24, 57, 35, 0.25);
+  cursor: grab;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.price-range-input::-moz-range-thumb:hover,
+.price-range-input:focus-visible::-moz-range-thumb {
+  transform: scale(1.12);
+  border-color: #CF6C87;
+  background-color: #F9E4E7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
