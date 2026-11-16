@@ -1,4 +1,4 @@
-import { TierKey } from '../types';
+import type { TierKey } from '../types/index.ts';
 
 export interface ServerProductPricing {
   name: string;

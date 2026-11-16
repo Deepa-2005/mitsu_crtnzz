@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
-dotenv.config({ override: true });
+dotenv.config();
 import crypto from 'crypto';
 import fs from 'fs/promises';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { CATALOG_PRICING, ServerProductPricing } from './src/lib/catalogPricing.ts';
+import { CATALOG_PRICING, type ServerProductPricing } from './src/lib/catalogPricing.ts';
 import { validateStudioDataState } from './src/lib/studioValidation.ts';
 import type { StudioDataState, TierKey } from './src/types/index.ts';
 

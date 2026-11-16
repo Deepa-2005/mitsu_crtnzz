@@ -4,7 +4,7 @@ import type {
   SpecialOffer,
   StudioDataState,
   TierKey,
-} from '../types';
+} from '../types/index.ts';
 
 export interface ValidationResult {
   valid: boolean;
